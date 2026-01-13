@@ -1,0 +1,199 @@
+library(readr)
+library(tidyverse)
+library(dplyr)
+library(purrr)
+library(openxlsx)
+
+## Let's laod all the data first ####
+years <- 2009:2023
+base_url <- "https://nccs-efile.s3.us-east-1.amazonaws.com/public/efile_v2_1/"
+
+#### Load 990 Files - Part 0 ####
+f990_p0_data <- map_dfr(
+  years,
+  ~ read_csv(
+    paste0(base_url, "F9-P00-T00-HEADER-", .x, ".CSV"),
+    col_types = cols(.default = col_character()),
+    show_col_types = FALSE
+  ) %>%
+    select(any_of(c("ORG_EIN", "OBJECTID"))) %>%
+    mutate(year = .x)
+)
+
+#### Load 990 Files - Part 1 ####
+f990_p1_data <- map_dfr(
+  years,
+  ~ read_csv(
+    paste0(base_url, "F9-P01-T00-SUMMARY-", .x, ".CSV"),
+    col_types = cols(.defeault = col_character()
+    ),
+    show_col_types = FALSE
+  ) %>%
+    mutate(year = .x),
+  .id = NULL
+)
+
+#### Load 990ez Files - Part 1 ####
+f990EZ_p1_data <- map_dfr(
+  years,
+  ~ read_csv(
+    paste0(base_url, "F9-P01-T00-SUMMARY-EZ-", .x, ".CSV"),
+    show_col_types = FALSE
+  ) %>%
+    mutate(year = .x),
+  .id = NULL
+)
+
+
+#### Load 990 Files - Part 8 ####
+f990_p8_data <- map_dfr(
+  years,
+  ~ read_csv(
+    paste0(base_url, "F9-P08-T00-REVENUE-", .x, ".CSV"),
+    show_col_types = FALSE
+  ) %>%
+    mutate(year = .x),
+  .id = NULL
+)
+
+#### Load 990 Files - Part 10 ####
+f990_p10_data <- map_dfr(
+  years,
+  ~ read_csv(
+    paste0(base_url, "F9-P10-T00-BALANCE-SHEET-", .x, ".CSV"),
+    show_col_types = FALSE
+  ) %>%
+    mutate(year = .x),
+  .id = NULL
+)
+
+food_aid <- readr::read_csv("C:/Users/cprinvil/Downloads/food_assistance_nonprofits_list.csv")
+
+### cleaning up the data ####
+Data_990_p0_clean <- f990_p0_data |>
+  distinct(ORG_EIN,year)
+
+## merge food_aid with clean data ###
+food_990_matches <- Data_990_p0_clean |>
+  dplyr::inner_join(food_aid %>% distinct(ORG_EIN),
+                    by = "ORG_EIN")
+
+### Number of nonprofits filed 990 P1 By Year###
+f990_p0_n <- food_990_matches |>
+  dplyr::group_by(year) |>
+  dplyr::summarise(
+    `Percent of Food-Aid Organizations` = (((n_distinct(ORG_EIN))/16225)),
+    .groups = "drop"
+  )
+
+### cleaning up the P1 data ####
+Data_990_p1_clean <- f990_p1_data |>
+  distinct(ORG_EIN,year)
+
+## merge food_aid with clean data ###
+food_990_matches <- Data_990_p1_clean |>
+  dplyr::inner_join(food_aid %>% distinct(ORG_EIN),
+                    by = "ORG_EIN")
+
+### Number of nonprofits filed 990 P1 By Year###
+f990_p1_n <- food_990_matches |>
+  dplyr::group_by(year) |>
+  dplyr::summarise(
+    `Percent of Food-Aid Organizations` = (((n_distinct(ORG_EIN))/16225)),
+    .groups = "drop"
+  )
+
+### Number of nonprofits filed 990EZ P1 By Year###
+# clean the data so it's one count per EIN and rid of duplicates #
+
+Data_990EZ_p1_clean <- f990EZ_p1_data |>
+  distinct(ORG_EIN,year)
+
+## merge food_aid with clean data ###
+food_990EZ_matches <- Data_990EZ_p1_clean |>
+  dplyr::inner_join(food_aid %>% distinct(ORG_EIN),
+                    by = "ORG_EIN")
+
+### Number of nonprofits filed 990 P1 By Year###
+f990EZ_p1_n <- food_990_matches |>
+  dplyr::group_by(year) |>
+  dplyr::summarise(
+    `Percent of Food-Aid Organizations` = (((n_distinct(ORG_EIN))/16225)),
+    .groups = "drop"
+  )
+
+### Number of nonprofits filed 990 P10 By Year###
+# clean the data so it's one count per EIN and rid of duplicates #
+
+Data_990_p10_clean <- f990_p10_data |>
+  distinct(ORG_EIN,year)
+
+## merge food_aid with clean data ###
+food_990_p10_matches <- Data_990_p10_clean |>
+  dplyr::inner_join(food_aid %>% distinct(ORG_EIN),
+                    by = "ORG_EIN")
+
+### Number of nonprofits filed 990 P10 By Year###
+f990_p10_n <- food_990_p10_matches |>
+  dplyr::group_by(year) |>
+  dplyr::summarise(
+    `Percent of Food-Aid Organizations` = (((n_distinct(ORG_EIN))/16225)),
+    .groups = "drop"
+  )
+
+### Number of nonprofits filed 990 P8 By Year###
+# clean the data so it's one count per EIN and rid of duplicates #
+
+Data_990_p8_clean <- f990_p8_data |>
+  distinct(ORG_EIN,year)
+
+## merge food_aid with clean data ###
+food_990_p8_matches <- Data_990_p8_clean |>
+  dplyr::inner_join(food_aid %>% distinct(ORG_EIN),
+                    by = "ORG_EIN")
+
+### Number of nonprofits filed 990 P10 By Year###
+f990_p8_n <- food_990_p8_matches |>
+  dplyr::group_by(year) |>
+  dplyr::summarise(
+    `Percent of Food-Aid Organizations` =(((n_distinct(ORG_EIN))/16225)),
+    .groups = "drop"
+  )
+### Place all the outputs in one excel sheet ###
+f990_p1_n <- f990_p1_n %>%
+  mutate(metric = "f990_p1_n")
+
+f990EZ_p1_n <- f990EZ_p1_n %>%
+  mutate(metric = "f990EZ_p1_n")
+
+f990_p8_n <- f990_p8_n %>%
+  mutate(metric = "f990_p8_n")
+
+f990_p10_n <- f990_p10_n %>%
+  mutate(metric = "f990_p10_n")
+
+long_table <- bind_rows(
+  f990_p1_n,
+  f990EZ_p1_n,
+  f990_p8_n,
+  f990_p10_n
+)
+
+final_table <- long_table %>%
+  pivot_wider(
+    names_from  = metric,
+    values_from = "Percent of Food-Aid Organizations"
+  ) %>%
+  arrange(year)
+
+#### place all sheets in one excel together ####
+# create workbook
+wb <- createWorkbook()
+addWorksheet(wb, "Summary_by_Year")
+writeData(wb, "Summary_by_Year", final_table)
+
+saveWorkbook(
+  wb,
+  "food_aid_990_summary.xlsx",
+  overwrite = TRUE
+)
