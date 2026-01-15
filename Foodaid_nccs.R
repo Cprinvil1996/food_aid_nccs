@@ -15,7 +15,7 @@ f990_p0_data <- years |>
     col_types = cols(.default = col_character()),
     show_col_types = FALSE
   ) |>
-    select(any_of(c("ORG_EIN", "OBJECTID"))) %>%
+    select(any_of(c("ORG_EIN", "TAX_YEAR"))) %>%
     mutate(year = .x)) |>
   list_rbind()
 
@@ -62,7 +62,7 @@ food_aid <- readr::read_csv("data/food_assistance_nonprofits_list.csv")
 
 ### cleaning up the data ####
 Data_990_p0_clean <- f990_p0_data |>
-  distinct(ORG_EIN, year)
+  distinct(ORG_EIN, TAX_YEAR)
 
 ## merge food_aid with clean data ###
 food_990_matches <- Data_990_p0_clean |>
@@ -72,7 +72,7 @@ food_990_matches <- Data_990_p0_clean |>
 
 ### Number of nonprofits filed 990 P1 By Year###
 f990_p0_n <- food_990_matches |>
-  dplyr::group_by(year) |>
+  dplyr::group_by(TAX_YEAR) |>
   dplyr::summarise(
     `Percent of Food-Aid Organizations` = (((n_distinct(ORG_EIN)) / 16225)),
     .groups = "drop"
@@ -80,7 +80,7 @@ f990_p0_n <- food_990_matches |>
 
 ### cleaning up the P1 data ####
 Data_990_p1_clean <- f990_p1_data |>
-  distinct(ORG_EIN, year)
+  distinct(ORG_EIN, TAX_YEAR)
 
 ## merge food_aid with clean data ###
 food_990_matches <- Data_990_p1_clean |>
@@ -90,7 +90,7 @@ food_990_matches <- Data_990_p1_clean |>
 
 ### Number of nonprofits filed 990 P1 By Year###
 f990_p1_n <- food_990_matches |>
-  dplyr::group_by(year) |>
+  dplyr::group_by(TAX_YEAR) |>
   dplyr::summarise(
     `Percent of Food-Aid Organizations` = (((n_distinct(ORG_EIN)) / 16225)),
     .groups = "drop"
@@ -100,7 +100,7 @@ f990_p1_n <- food_990_matches |>
 # clean the data so it's one count per EIN and rid of duplicates #
 
 Data_990EZ_p1_clean <- f990EZ_p1_data |>
-  distinct(ORG_EIN, year)
+  distinct(ORG_EIN, TAX_YEAR)
 
 ## merge food_aid with clean data ###
 food_990EZ_matches <- Data_990EZ_p1_clean |>
@@ -110,7 +110,7 @@ food_990EZ_matches <- Data_990EZ_p1_clean |>
 
 ### Number of nonprofits filed 990 P1 By Year###
 f990EZ_p1_n <- food_990_matches |>
-  dplyr::group_by(year) |>
+  dplyr::group_by(TAX_YEAR) |>
   dplyr::summarise(
     `Percent of Food-Aid Organizations` = (((n_distinct(ORG_EIN)) / 16225)),
     .groups = "drop"
@@ -120,7 +120,7 @@ f990EZ_p1_n <- food_990_matches |>
 # clean the data so it's one count per EIN and rid of duplicates #
 
 Data_990_p10_clean <- f990_p10_data |>
-  distinct(ORG_EIN, year)
+  distinct(ORG_EIN, TAX_YEAR)
 
 ## merge food_aid with clean data ###
 food_990_p10_matches <- Data_990_p10_clean |>
@@ -130,7 +130,7 @@ food_990_p10_matches <- Data_990_p10_clean |>
 
 ### Number of nonprofits filed 990 P10 By Year###
 f990_p10_n <- food_990_p10_matches |>
-  dplyr::group_by(year) |>
+  dplyr::group_by(TAX_YEAR) |>
   dplyr::summarise(
     `Percent of Food-Aid Organizations` = (((n_distinct(ORG_EIN)) / 16225)),
     .groups = "drop"
@@ -140,7 +140,7 @@ f990_p10_n <- food_990_p10_matches |>
 # clean the data so it's one count per EIN and rid of duplicates #
 
 Data_990_p8_clean <- f990_p8_data |>
-  distinct(ORG_EIN, year)
+  distinct(ORG_EIN, TAX_YEAR)
 
 ## merge food_aid with clean data ###
 food_990_p8_matches <- Data_990_p8_clean |>
@@ -150,7 +150,7 @@ food_990_p8_matches <- Data_990_p8_clean |>
 
 ### Number of nonprofits filed 990 P10 By Year###
 f990_p8_n <- food_990_p8_matches |>
-  dplyr::group_by(year) |>
+  dplyr::group_by(TAX_YEAR) |>
   dplyr::summarise(
     `Percent of Food-Aid Organizations` = (((n_distinct(ORG_EIN)) / 16225)),
     .groups = "drop"
