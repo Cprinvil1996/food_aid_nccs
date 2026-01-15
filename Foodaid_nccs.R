@@ -58,7 +58,7 @@ f990_p10_data <- years |>
     mutate(year = .x)) |>
   list_rbind()
 
-food_aid <- readr::read_csv("C:/Users/cprinvil/Downloads/food_assistance_nonprofits_list.csv")
+food_aid <- readr::read_csv("data/food_assistance_nonprofits_list.csv")
 
 ### cleaning up the data ####
 Data_990_p0_clean <- f990_p0_data |>
